@@ -289,7 +289,9 @@
 
 ## 追記
 
-本稿の付録として、 vagrant を用いて [Alpine Linux][EX001] 環境に [Linuxbrew][EX005] を導入した際に使用した ```Vagrantfile``` を以下に添付致します。
+本稿の付録として、 vagrant を用いて [Alpine Linux][EX001] 環境に [Linuxbrew][EX005] を導入した際に使用した ```Vagrantfile``` 及び [Linuxbrew][EX005] を tarball で固めたものを以下に添付致します。
+
+[https://github.com/z80oolong/Linuxbrew-for-Alpine/releases][EX014]
 
 <!-- 章・節のリンク一覧 -->
 
@@ -320,3 +322,4 @@
 [EX011]:https://www.ruby-lang.org/ja/news/2019/04/17/ruby-2-6-3-released/
 [EX012]:http://sjackman.ca/
 [EX013]:https://app.vagrantup.com/alpine/boxes/alpine64
+[EX014]:https://github.com/z80oolong/Linuxbrew-for-Alpine/releases
