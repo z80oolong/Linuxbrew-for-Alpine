@@ -21,5 +21,5 @@
 [EX001]:https://www.alpinelinux.org/
 [EX002]:https://docs.brew.sh/Homebrew-on-Linux
 [EX003]:https://github.com/z80oolong/Linuxbrew-for-Alpine/releases
-[EX004]:https://github.com/z80oolong/Linuxbrew-for-Alpine/blob/master/README.md
+[EX004]:https://github.com/z80oolong/Linuxbrew-for-Alpine/blob/master/Linuxbrew-for-Alpine.md
 [EX005]:http://sjackman.ca/
