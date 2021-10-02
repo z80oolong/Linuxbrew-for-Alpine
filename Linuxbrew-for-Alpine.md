@@ -58,11 +58,8 @@
 
 そして、 ["Linuxbrew の内部で使用する Ruby 処理系のビルド"][SEC0104] の節にて後述する [Linuxbrew][EX005] 内部で使用する ruby 処理系をソースコードからビルドする際に使用するヘッダファイル群を集めたパッケージである ```linux-headers``` 及び、 ruby 処理系から readline 及び zlib を扱うために必要となるパッケージである ```readline-dev, zlib-dev``` も同時に導入する必要があります。 
 
-なお、 ```curl, git``` 等の幾つかの apk パッケージは ```libcrypto3``` パッケージに依存していますが、 ```libcrypto3``` パッケージで導入される一部設定ファイルは、 [Alpine Linux][EX001] 環境で採用されている LibreSSL を競合するため、 ```libcrypto3``` パッケージを導入する際は、 ```apk add``` コマンドに ```--force``` オプション及び ```--quiet``` オプションを付与し、パッケージを強制的にかつ警告を無視するように導入する必要があります。
-
 ```
  # apk update
- # apk add --force --quiet libcrypto3
  # apk add bash build-base curl file git gzip libc6-compat ncurses
  # apk add ruby ruby-sdbm ruby-gdbm ruby-etc ruby-irb ruby-json sudo
  # apk add grep coreutils procps readline-dev zlib-dev linux-headers
@@ -174,6 +171,15 @@
 
 次に、以下の通りに [ruby 2.6.3 のソースコード][EX011]を展開し、ディレクトリ ```/home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby/2.6.3_2``` 以下にソースコードのビルドに基づいて [Linuxbrew][EX005] 内部で使用する ruby 処理系を導入します。
 
+なお、スクリプト ```./configure``` を起動する際は、インストール先を示すオプション ```--prefix``` を指定する他に、以下のオプションも同時に指定します。
+
+- ```--enable-load-relative``` … 実行ファイル ```ruby``` 及び ```libruby.so.*``` の探索先を相対化する。
+- ```--with-static-linked-ext``` … 外部ライブラリを ```libruby.so.*``` に静的に結合する。
+- ```--with-out-ext=openssl,tk,sdbm,gdbm,dbm,win32,win32ole``` … 外部ライブラリ ```openssl,tk,sdbm,gdbm,dbm,win32,win32ole``` を使用しない。
+- ```--without-gmp``` … GMP による Bignum の演算の高速化を無効にする。
+- ```--disable-install-doc, --disable-install-rdoc``` … ruby 処理系に関するドキュメント類の生成を抑止する。
+- ```--disable-dependency-tracking``` … 依存性の追跡を無効にする。
+
 ```
  # tar -xvf ruby-2.6.3.tar.gz
  # 
@@ -183,6 +189,20 @@
 	       --without-gmp --disable-install-doc --disable-install-rdoc --disable-dependency-tracking
  # make
  # make install
+```
+
+また、 ruby 処理系のビルド中に発生する各種警告を抑止したい場合は、スクリプト ```./configure``` の実行前に予め以下の通りに環境変数 ```CFLAGS, CXXFLAGS``` を設定します。
+
+```
+ # export CFLAGS="$CFLAGS -O3 -ggdb3 -Wall -Wextra -Wdeclaration-after-statement -Wdeprecated-declarations"
+ # export CFLAGS="$CFLAGS -Wimplicit-function-declaration -Wimplicit-int -Wpointer-arith -Wwrite-strings"
+ # export CFLAGS="$CFLAGS -Wmissing-noreturn -Wno-cast-function-type -Wno-constant-logical-operand -Wno-long-long"
+ # export CFLAGS="$CFLAGS -Wno-missing-field-initializers -Wno-overlength-strings -Wno-packed-bitfield-compat"
+ # export CFLAGS="$CFLAGS -Wno-parentheses-equality -Wno-self-assign -Wno-tautological-compare -Wno-unused-parameter"
+ # export CFLAGS="$CFLAGS -Wno-unused-value -Wsuggest-attribute=noreturn -Wno-unused-variable -Wno-implicit-fallthrough"
+ # export CFLAGS="$CFLAGS -Wno-address-of-packed-member -Wno-incompatible-pointer-types -Wno-declaration-after-statement"
+ # export CFLAGS="$CFLAGS -Wno-empty-body -Wno-sign-compare -Wno-unused-but-set-variable"
+ # export CXXFLAGS="$CXXFLAGS $CFLAGS"
 ```
 
 その後、ディレクトリ ```/home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby``` に移動し、以下のようにしてディレクトリ ```2.6.3_2``` より ```current``` に向けてシンボリックリンクを張ります。
