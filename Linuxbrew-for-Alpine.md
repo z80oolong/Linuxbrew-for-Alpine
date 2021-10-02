@@ -50,7 +50,7 @@
 
 ### <a id="SEC0101" />Linuxbrew に依存する apk パッケージの導入
 
-[Alpine Linux][EX001] 環境に [Linuxbrew][EX005] を導入する為に、先ず、 [Linuxbrew][EX005] の動作に関して必要となる [Alpine Linux] 環境の apk パッケージを導入します。
+[Alpine Linux][EX001] 環境に [Linuxbrew][EX005] を導入する為に、先ず、 [Linuxbrew][EX005] の動作に関して必要となる [Alpine Linux][EX001] 環境の apk パッケージを導入します。
 
 導入する apk パッケージについては、 ["Install Linuxbrew on Alpine Linux"][EX007] に記述されたパッケージを参照しますが、 ```ruby-dbm``` パッケージは既に obsolete となっているため、これに代えて ```ruby-sdbm, ruby-gdbm``` を導入します。
 
@@ -58,11 +58,14 @@
 
 そして、 ["Linuxbrew の内部で使用する Ruby 処理系のビルド"][SEC0104] の節にて後述する [Linuxbrew][EX005] 内部で使用する ruby 処理系をソースコードからビルドする際に使用するヘッダファイル群を集めたパッケージである ```linux-headers``` 及び、 ruby 処理系から readline 及び zlib を扱うために必要となるパッケージである ```readline-dev, zlib-dev``` も同時に導入する必要があります。 
 
+なお、 ```curl, git``` 等の幾つかの apk パッケージは ```libcrypto3``` パッケージに依存していますが、 ```libcrypto3``` パッケージで導入される一部設定ファイルは、 [Alpine Linux][EX001] 環境で採用されている LibreSSL を競合するため、 ```libcrypto3``` パッケージを導入する際は、 ```apk add``` コマンドに ```--force``` オプション及び ```--quiet``` オプションを付与し、パッケージを強制的にかつ警告を無視するように導入する必要があります。
+
 ```
- # apk upgrade
- # apk add bash build-base curl file git gzip libc6-compat ncurses 
- # apk add ruby ruby-sdbm ruby-gdbm ruby-etc ruby-irb ruby-json sudo        
- # apk add grep coreutils procps readline-dev zlib-dev linux-header
+ # apk update
+ # apk add --force --quiet libcrypto3
+ # apk add bash build-base curl file git gzip libc6-compat ncurses
+ # apk add ruby ruby-sdbm ruby-gdbm ruby-etc ruby-irb ruby-json sudo
+ # apk add grep coreutils procps readline-dev zlib-dev linux-headers
 ```
 
 ### <a id="SEC0102" />ldd コマンドの修正
@@ -104,11 +107,7 @@
 
 そこで、 [Alpine Linux][EX001] 環境において [Linuxbrew][EX005] を動作させる際には、スクリプトファイル ```/usr/bin/ldd``` を別のファイルに退避させた上で、以下の通りに、 ```ldd``` コマンドに ```--version``` オプションを渡した時に適当な出力を返すように ```/usr/bin/ldd``` を修正する必要があります。
 
-```
- # cp -pv /usr/bin/ldd /usr/bin/ldd.old
- `/usr/bin/ldd' -> `/usr/bin/ldd.old'
- # vi /usr/bin/ldd
- # cat /usr/bin/ldd
+```/usr/bin/ldd
  #!/bin/sh
  while test $# -gt 0; do
    case "$1" in
