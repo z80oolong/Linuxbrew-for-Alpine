@@ -1,0 +1,20 @@
+$:.unshift(File.expand_path("../../lib", __FILE__))
+
+require "provision"
+require "version_date"
+
+Vagrant.configure("2") do |config|
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
+
+  config.ssh.insert_key = false
+  config.vm.define "alpine-brew-virtualbox-#{VersionDate}"
+  config.vm.box = "alpine/alpine64"
+  config.vm.synced_folder "./", "/vagrant"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name   = "alpine-brew-virtualbox-#{VersionDate}"
+    vb.memory = 2048
+  end
+end

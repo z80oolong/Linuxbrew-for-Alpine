@@ -1,0 +1,15 @@
+{
+    "description": "Linuxbrew environment for Alpine Linux.",
+    "short_description": "Linuxbrew for Alpine",
+    "name": "alpine-brew",
+    "versions": [{
+        "version": "%VERSION_DATE%",
+        "status": "active",
+        "description_html": "<p>Linuxbrew for Alpine %VERSION_DATE%</p>",
+        "description_markdown": "Linuxbrew for Alpine %VERSION_DATE%",
+        "providers": [{
+            "name": "virtualbox",
+            "url": "./package-%VERSION_DATE%.box"
+        }]
+    }]
+}

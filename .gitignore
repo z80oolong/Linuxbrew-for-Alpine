@@ -1,0 +1,7 @@
+tmp/*
+virtualbox/release
+virtualbox/.vagrant
+virtualbox/alpine-brew.log
+libvirt/release
+libvirt/.vagrant
+libvirt/alpine-brew.log
