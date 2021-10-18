@@ -6,7 +6,11 @@
 
 なお、前述の文書である ["Alpine Linux 環境に Linuxbrew を導入する手法"][EX001] で述べた手法で構築した [Linuxbrew][EX002] も以下の URL にて配布しています。
 
-[https://github.com/z80oolong/Linuxbrew-for-Alpine/releases][EX003]
+- [https://github.com/z80oolong/Linuxbrew-for-Alpine/releases][EX003]
+
+また、本リポジトリにより作成した [Linuxbrew][EX002] が動作する [Alpine Linux][EX003] 環境の Vagrant Box を以下の URL にて配布しています。こちらの方もどうか御覧下さい。
+
+- [https://app.vagrantup.com/z80oolong/boxes/alpine-brew][EX009]
 
 ## Vagrant Box の作成法
 
@@ -58,3 +62,4 @@
 [EX006]:https://www.vagrantup.com/
 [EX007]:https://www.virtualbox.org/
 [EX008]:https://libvirt.org/
+[EX009]:https://app.vagrantup.com/z80oolong/boxes/alpine-brew
