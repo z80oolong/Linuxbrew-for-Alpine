@@ -313,7 +313,7 @@
 
 ## 追記
 
-本稿の付録として、 vagrant を用いて [Alpine Linux][EX001] 環境に [Linuxbrew][EX005] を導入した際に使用した ```Vagrantfile``` 及び [Linuxbrew][EX005] を tarball で固めたものを以下に添付致します。
+本稿の付録として、 vagrant を用いて [Alpine Linux][EX001] 環境に導入された [Linuxbrew][EX005] を tarball で固めたものを以下に添付致します。
 
 [https://github.com/z80oolong/Linuxbrew-for-Alpine/releases][EX014]
 

@@ -36,7 +36,8 @@ export PACKAGE_JSON="./alpine-brew-virtualbox-${VERSION_DATE}.json"
 
 (${VAGRANT} box add --force ${BASEBOX} && \
  ${VAGRANT} destroy && \
- ${VAGRANT} up --provider virtualbox 2>&1 | ${TEE} ${LOGFILE}) || exit 255
+ ${VAGRANT} up --provider virtualbox 2>&1 | ${TEE} ${LOGFILE} && \
+ ${VAGRANT} halt) || exit 255
 
 ${RM} -rf ${RELEASE_DIR}
 ${MKDIR} -p ${RELEASE_DIR}

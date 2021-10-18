@@ -33,7 +33,8 @@ export PACKAGE_JSON="./alpine-brew-libvirt-${VERSION_DATE}.json"
 
 (${VAGRANT} mutate --force --input-provider virtualbox ${BASEBOX} libvirt && \
  ${VAGRANT} destroy && \
- ${VAGRANT} up 2>&1 | ${TEE} ${LOGFILE}) || exit 255
+ ${VAGRANT} up --provider libvirt 2>&1 | ${TEE} ${LOGFILE} && \
+ ${VAGRANT} halt) || exit 255
 
 ${RM} -rf ${RELEASE_DIR}
 ${MKDIR} -p ${RELEASE_DIR}
