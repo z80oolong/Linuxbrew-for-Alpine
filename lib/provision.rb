@@ -59,16 +59,16 @@ Vagrant.configure("2") do |config|
     (cd /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
      mkdir src && \
      cd src && \
-     curl -L -o ruby-2.6.3.tar.gz https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.3.tar.gz && \
-     tar -xvf ruby-2.6.3.tar.gz; cd ruby-2.6.3 && \
-     ./configure --prefix=/home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby/2.6.3_2 \
+     curl -L -o ruby-2.6.8.tar.gz https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.8.tar.gz && \
+     tar -xvf ruby-2.6.8.tar.gz; cd ruby-2.6.8 && \
+     ./configure --prefix=/home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby/2.6.8 \
                  --enable-load-relative --with-static-linked-ext --with-out-ext=openssl,tk,sdbm,gdbm,dbm,win32,win32ole \
                  --without-gmp --disable-install-doc --disable-install-rdoc --disable-dependency-tracking && \
      make -j4 && \
      make install && \
      true) || false
     (cd /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
-     ln -sf 2.6.3_2 current && \
+     ln -sf 2.6.8 current && \
      rm -rf src && \
      true) || false
 
