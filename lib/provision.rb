@@ -1,37 +1,44 @@
 # Provision Code.
 
 Vagrant.configure("2") do |config|
+  # Setup /etc/resolv.conf.
   config.vm.provision "shell", privileged: true, inline: %q[
-    echo "nameserver 1.1.1.1" >  /etc/resolv.conf
-    echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-    echo "nameserver 8.8.4.4" >> /etc/resolv.conf
-    echo "==> /etc/resolv.conf <=="
-    cat  /etc/resolv.conf
+    (echo "nameserver 1.1.1.1" >  /etc/resolv.conf && \
+     echo "nameserver 8.8.8.8" >> /etc/resolv.conf && \
+     echo "nameserver 8.8.4.4" >> /etc/resolv.conf && \
+     echo "==> /etc/resolv.conf <==" && \
+     cat  /etc/resolv.conf) || exit 255
   ]
 
+  # Setup /etc/apk/repositories.
   config.vm.provision "shell", privileged: true, inline: %q[
-    echo "http://nl.alpinelinux.org/alpine/v3.7/main"      >  /etc/apk/repositories
-    echo "http://nl.alpinelinux.org/alpine/v3.7/community" >> /etc/apk/repositories
-    echo "==> /etc/apk/repositories <=="
-    cat  /etc/apk/repositories
+    (echo "http://nl.alpinelinux.org/alpine/v3.7/main"      >  /etc/apk/repositories && \
+     echo "http://nl.alpinelinux.org/alpine/v3.7/community" >> /etc/apk/repositories && \
+     echo "==> /etc/apk/repositories <==" && \
+     cat  /etc/apk/repositories) || exit 255
   ]
 
+  # Change password of user "vagrant" and "root".
   config.vm.provision "shell", privileged: true, inline: %q[
-    echo "vagrant:vagrant" | chpasswd
-    echo "root:vagrant" | chpasswd
+    (echo "vagrant:vagrant" | chpasswd && \
+     echo "root:vagrant" | chpasswd) || exit 255
   ]
 
+  # Run apk update, apk upgrade
   config.vm.provision "shell", privileged: true, inline: "apk --no-cache update"
   config.vm.provision "shell", privileged: true, inline: "apk --no-cache upgrade"
 
+  # Install the packages required to install Linuxbrew. (ruby, curl, git, etc.)
   config.vm.provision "shell", privileged: true, inline: %q[
     apk add --no-cache bash build-base ruby curl file git gzip libc6-compat ncurses
   ]
 
+  # Install the packages required to install Linuxbrew. (coreutils, linux-headers, etc.)
   config.vm.provision "shell", privileged: true, inline: %q[
     apk add --no-cache sudo grep coreutils procps readline-dev zlib-dev linux-headers
   ]
 
+  # Fix /usr/bin/ldd.
   config.vm.provision "shell", privileged: true, inline: %q[
     (cp -prv /usr/bin/ldd /usr/bin/ldd.old && \
      echo '#!/bin/sh' > /usr/bin/ldd.tmp && \
@@ -46,19 +53,23 @@ Vagrant.configure("2") do |config|
      echo 'exec /lib/ld-musl-x86_64.so.1 --list "$@"' >> /usr/bin/ldd.tmp && \
      sync && \
      mv -v /usr/bin/ldd.tmp /usr/bin/ldd && \
-     chmod 0755 /usr/bin/ldd) || exit 255
+     chmod -v 0755 /usr/bin/ldd && \
+     echo "==> /usr/bin/ldd <==" && \
+     cat /usr/bin/ldd) || exit 255
   ]
 
+  # Create a directory tree for Linuxbrew.
   config.vm.provision "shell", privileged: true, inline: %q[
     mkdir -p /home/linuxbrew/.linuxbrew
     (cd /home/linuxbrew/.linuxbrew && \
-     mkdir Caskroom Cellar Frameworks bin etc include lib opt sbin share tmp && \
-     mkdir -p var/homebrew/links && \
+     mkdir -v Caskroom Cellar Frameworks bin etc include lib opt sbin share tmp && \
+     mkdir -pv var/homebrew/links && \
      git clone https://github.com/Homebrew/brew ./Homebrew && \
      cd /home/linuxbrew/.linuxbrew/bin && \
-     ln -sf ../Homebrew/bin/brew .) || exit 255
+     ln -sfv ../Homebrew/bin/brew .) || exit 255
   ]
 
+  # Build "portable-ruby" for use inside Linuxbrew.
   config.vm.provision "shell", privileged: true, inline: %q[
     export CFLAGS="$CFLAGS -O3 -ggdb3 -Wall -Wextra -Wdeclaration-after-statement -Wdeprecated-declarations"
     export CFLAGS="$CFLAGS -Wimplicit-function-declaration -Wimplicit-int -Wpointer-arith -Wwrite-strings"
@@ -70,9 +81,9 @@ Vagrant.configure("2") do |config|
     export CFLAGS="$CFLAGS -Wno-empty-body -Wno-sign-compare -Wno-unused-but-set-variable"
     export CXXFLAGS="$CXXFLAGS $CFLAGS"
 
-    (mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
+    (mkdir -pv /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
      cd /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
-     mkdir src && \
+     mkdir -v src && \
      cd src && \
      curl -L -o ruby-2.6.8.tar.gz https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.8.tar.gz && \
      tar -xvf ruby-2.6.8.tar.gz; cd ruby-2.6.8 && \
@@ -83,75 +94,77 @@ Vagrant.configure("2") do |config|
      make install) || exit 255
   ]
 
+  # Remove "portable-ruby" source code.
   config.vm.provision "shell", privileged: true, inline: %q[
     (cd /home/linuxbrew/.linuxbrew/Homebrew/Library/Homebrew/vendor/portable-ruby && \
-     ln -sf 2.6.8 current && \
-     rm -rf src) || exit 255
+     ln -sfv 2.6.8 current && \
+     rm -rfv src) || exit 255
   ]
 
-  config.vm.provision "shell", privileged: true, inline: "chown -R vagrant:vagrant /home/linuxbrew"
+  # Change owner of directory /home/linuxbrew 
+  config.vm.provision "shell", privileged: true, inline: "chown -v -R vagrant:vagrant /home/linuxbrew"
 
+  # Setup SSH connection.
   config.vm.provision "shell", privileged: false, inline: %q[
-    curl -sL https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub >> ~/.ssh/authorized_key
-    chmod 0600 ~/.ssh/authorized_key
-    chmod 0700 ~/.ssh
+    (curl -sL https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub >> ~/.ssh/authorized_key && \
+     chmod -v 0600 ~/.ssh/authorized_key && \
+     chmod -v 0700 ~/.ssh) || exit 255
   ]
 
+  # Initialize Linuxbrew Tap repository homebrew/homebrew-core
   config.vm.provision "shell", privileged: false, inline: %q[
-    mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core
-    git config --global init.defaultBranch master
+    (mkdir -pv /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core && \
+     git config --global init.defaultBranch master && \
+     echo "==> git config --global init.defaultBranch master") || exit 255
   ]
 
+  # Download Tap repository homebrew/homebrew-core
   config.vm.provision "shell", privileged: false, inline: "/home/linuxbrew/.linuxbrew/bin/brew tap homebrew/core"
   config.vm.provision "shell", privileged: false, inline: "/home/linuxbrew/.linuxbrew/bin/brew update"
 
+  # Setup environment variable HOMEBREW_PREFIX, PATH, etc.
   config.vm.provision "shell", privileged: false, inline: %q[
-    /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.bashrc 
-    /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+    (/home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.bashrc && \
+     echo "/home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.bashrc" && \
+     /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile && \
+     echo "/home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile" && \
+     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv) && \
+     echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)') || exit 255
   ]
 
+  # Install glibc from Linuxbrew.
   config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force glibc"
-  config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force linux-headers"
 
+  # Install packages that depend on git, gcc, ruby from Linuxbrew.
+  # (include curl and linux-headers.)
   config.vm.provision "shell", privileged: false, inline: %q[
-    for f in `brew deps -n gcc`; do
+    for f in `brew deps -n --union curl git gcc ruby`; do
       (brew install --force-bottle --force $f) || exit 255
     done
   ]
-  config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force gcc"
 
+  # Setup environment variable HOMEBREW_FORCE_BREWED_CURL.
+  # (because of using curl in Linuxbrew.)
   config.vm.provision "shell", privileged: false, inline: %q[
-    for f in `brew deps -n curl`; do
-      (brew install --force-bottle --force $f) || exit 255
-    done
+    (echo 'export HOMEBREW_FORCE_BREWED_CURL="1"' >> ~/.bashrc && \
+     echo 'export HOMEBREW_FORCE_BREWED_CURL="1"' >> ~/.profile && \
+     export HOMEBREW_FORCE_BREWED_CURL="1" && \
+     echo 'export HOMEBREW_FORCE_BREWED_CURL="1"') || exit 255
   ]
-  config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force curl"
 
-  config.vm.provision "shell", privileged: false, inline: %q[
-    for f in `brew deps -n git`; do
-      (brew install --force-bottle --force $f) || exit 255
-    done
-  ]
+  # Install git, gcc, ruby from Linuxbrew.
   config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force git"
-
-  config.vm.provision "shell", privileged: false, inline: %q[
-    for f in `brew deps -n ruby`; do
-      (brew install --force-bottle --force $f) || exit 255
-    done
-  ]
+  config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force gcc"
   config.vm.provision "shell", privileged: false, inline: "brew install --force-bottle --force ruby"
 
-  config.vm.provision "shell", privileged: false, inline: %q[
-    echo 'export HOMEBREW_FORCE_BREWED_CURL="1"' >>~/.bashrc
-    echo 'export HOMEBREW_FORCE_BREWED_CURL="1"' >>~/.profile
-    export HOMEBREW_FORCE_BREWED_CURL="1"
-  ]
-
+  # Build hello, patchelf from Linuxbrew.
   config.vm.provision "shell", privileged: false, inline: "brew install -dvs hello"
   config.vm.provision "shell", privileged: false, inline: "brew install -dvs patchelf"
+
+  # Clean up cache of Linuxbrew and git and ruby apk packages.
   config.vm.provision "shell", privileged: false, inline: "brew cleanup --prune=all"
   config.vm.provision "shell", privileged: true,  inline: "apk del --purge git ruby"
 
+  # Diagnose Linuxbrew.
   config.vm.provision "shell", privileged: false, inline: "brew doctor"
 end
